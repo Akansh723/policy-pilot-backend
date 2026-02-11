@@ -35,7 +35,9 @@ export const createApp = (): Application => {
   }
 
   // Swagger documentation
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  const swaggerServe = swaggerUi.serve as any;
+  const swaggerSetup = swaggerUi.setup(swaggerSpec) as any;
+  app.use("/api-docs", swaggerServe, swaggerSetup);
 
   // Routes
   app.use("/health", healthRoute);
