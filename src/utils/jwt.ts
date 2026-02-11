@@ -3,7 +3,7 @@ import { env } from "../config/env";
 
 export const signToken = (payload: object): string => {
   return jwt.sign(payload, env.jwtSecret, {
-    expiresIn: env.jwtExpiresIn
+    expiresIn: env.jwtExpiresIn as string
   });
 };
 

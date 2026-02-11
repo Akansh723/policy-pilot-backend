@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import authRoutes from "./routes/auth.route";
 import vehicleRoutes from "./routes/vehicle.route";
 import addPolicyRoutes from "./routes/addPolicy.route";
@@ -11,6 +12,7 @@ import userPolicyRoutes from "./routes/buy-policy.route";
 import userRoutes from "./routes/user.route";
 
 import { env } from "./config/env";
+import { swaggerSpec } from "./config/swagger";
 import { errorHandler } from "./middlewares/error.middleware";
 import healthRoute from "./routes/health.route";
 
@@ -31,6 +33,9 @@ export const createApp = (): Application => {
   if (env.nodeEnv === "development") {
     app.use(morgan("dev"));
   }
+
+  // Swagger documentation
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Routes
   app.use("/health", healthRoute);

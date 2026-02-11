@@ -1,13 +1,5 @@
 import { Router } from "express";
-import {
-  requestOTP,
-  verifyOTPAndLogin
-} from "../controllers/auth.controller";
-import { validate } from "../middlewares/validate.middleware";
-import {
-  requestOTPValidator,
-  verifyOTPValidator
-} from "../validators/auth.validator";
+import { requestOtp, verifyOtp } from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -37,7 +29,7 @@ const router = Router();
  *       500:
  *         description: Server error
  */
-router.post("/request-otp", requestOTPValidator, validate, requestOTP);
+router.post("/request-otp", requestOtp);
 
 /**
  * @swagger
@@ -85,6 +77,6 @@ router.post("/request-otp", requestOTPValidator, validate, requestOTP);
  *       404:
  *         description: User not found
  */
-router.post("/verify-otp", verifyOTPValidator, validate, verifyOTPAndLogin);
+router.post("/verify-otp", verifyOtp);
 
 export default router;

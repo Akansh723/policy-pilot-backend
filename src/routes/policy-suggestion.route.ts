@@ -5,6 +5,46 @@ import { AddOn } from "../models/addon.model";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /policies/suggest/{licencePlate}:
+ *   get:
+ *     summary: Get policy suggestions for a vehicle
+ *     tags: [Policy]
+ *     parameters:
+ *       - in: path
+ *         name: licencePlate
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: "DL01AB1234"
+ *       - in: query
+ *         name: fuelType
+ *         schema:
+ *           type: string
+ *           enum: [petrol, diesel, electric, cng]
+ *       - in: query
+ *         name: usageType
+ *         schema:
+ *           type: string
+ *           enum: [personal, commercial]
+ *       - in: query
+ *         name: purchaseYear
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: insuranceClaimsCount
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Policy suggestions retrieved
+ *       400:
+ *         description: Missing required parameters
+ *       404:
+ *         description: No matching policy found
+ */
+
 const AGE_PREMIUM_FACTOR = 300;
 const COMMERCIAL_MARKUP = 0.2;
 const CLAIM_PENALTY = 0.1;

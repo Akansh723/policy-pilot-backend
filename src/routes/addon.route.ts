@@ -3,6 +3,56 @@ import { AddOn } from "../models/addon.model";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /addOns/add:
+ *   post:
+ *     summary: Create a new add-on
+ *     tags: [Add-ons]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - code
+ *               - priceType
+ *               - priceValue
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Zero Depreciation"
+ *               code:
+ *                 type: string
+ *                 example: "ZERO_DEP"
+ *               description:
+ *                 type: string
+ *                 example: "No depreciation on claim"
+ *               priceType:
+ *                 type: string
+ *                 enum: [flat, percentage]
+ *                 example: "percentage"
+ *               priceValue:
+ *                 type: number
+ *                 example: 15
+ *               maxVehicleAge:
+ *                 type: number
+ *                 example: 5
+ *               applicableForFuel:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum: [petrol, diesel, electric, cng]
+ *     responses:
+ *       201:
+ *         description: Add-on created successfully
+ *       400:
+ *         description: Missing required fields
+ *       409:
+ *         description: Add-on code already exists
+ */
 router.post("/", async (req: Request, res: Response) => {
   try {
     const {

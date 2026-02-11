@@ -8,6 +8,18 @@ import { purchasePolicyValidator } from "../validators/policy.validator";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /policy/all:
+ *   get:
+ *     summary: Get all purchased policies (Admin)
+ *     tags: [Policy Purchase]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all purchased policies
+ */
 router.get("/all", authenticate, async (req: Request, res: Response) => {
   const policies = await PolicyPurchase.find()
     .populate("userId", "mobile name")
@@ -27,8 +39,45 @@ router.post(
   purchasePolicy
 );
 
+/**
+ * @swagger
+ * /policy/buy:
+ *   post:
+ *     summary: Purchase a policy
+ *     tags: [Policy Purchase]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - vehicleId
+ *               - policyId
+ *               - basePremium
+ *             properties:
+ *               vehicleId:
+ *                 type: string
+ *               policyId:
+ *                 type: string
+ *               addons:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               basePremium:
+ *                 type: number
+ *               addonsPremium:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Policy purchased successfully
+ *       400:
+ *         description: Missing required fields
+ */
 router.post("/buy", authenticate,  async (req: Request, res: Response) => {
-  const userId = req.user.userId; 
+  const userId = req.user!.userId; 
   const {
     vehicleId,
     policyId,
@@ -62,8 +111,20 @@ router.post("/buy", authenticate,  async (req: Request, res: Response) => {
 });
 
 
+/**
+ * @swagger
+ * /policy/my:
+ *   get:
+ *     summary: Get my purchased policies
+ *     tags: [Policy Purchase]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's purchased policies
+ */
 router.get("/my", authenticate, async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   
   const policies = await PolicyPurchase.find({ userId })
   .populate("vehicleId")

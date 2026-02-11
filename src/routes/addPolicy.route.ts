@@ -4,11 +4,78 @@ import { getAllPolicies } from "../controllers/policyManagement.controller";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /add-policy:
+ *   get:
+ *     summary: Get all policies
+ *     tags: [Policy Management]
+ *     responses:
+ *       200:
+ *         description: List of all policies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Policy'
+ */
 router.get("/", getAllPolicies);
 
 /**
- * POST /api/policies
- * Add insurance policy rule
+ * @swagger
+ * /add-policy:
+ *   post:
+ *     summary: Add new insurance policy
+ *     tags: [Policy Management]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - category
+ *               - fuelType
+ *               - usageType
+ *               - purchaseYearGap
+ *               - basePremium
+ *               - providerName
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 example: "car"
+ *               fuelType:
+ *                 type: string
+ *                 enum: [petrol, diesel, electric, cng]
+ *               usageType:
+ *                 type: string
+ *                 enum: [personal, commercial]
+ *               purchaseYearGap:
+ *                 type: number
+ *                 example: 5
+ *               basePremium:
+ *                 type: number
+ *                 example: 5000
+ *               idvPercentage:
+ *                 type: number
+ *                 example: 80
+ *               claimBonusPercentage:
+ *                 type: number
+ *                 example: 20
+ *               providerName:
+ *                 type: string
+ *                 example: "HDFC ERGO"
+ *     responses:
+ *       201:
+ *         description: Policy added successfully
+ *       400:
+ *         description: Missing required fields
  */
 router.post("/", async (req: Request, res: Response) => {
   try {

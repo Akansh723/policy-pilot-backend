@@ -3,7 +3,7 @@ import { User } from "../models/user.model";
 import { successResponse } from "../utils/response";
 
 export const getProfile = async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
 
   const user = await User.findById(userId).select("-otp -otpExpiresAt");
 
@@ -25,7 +25,7 @@ export const getProfile = async (req: Request, res: Response) => {
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const { name, age, gender } = req.body;
 
   const user = await User.findByIdAndUpdate(

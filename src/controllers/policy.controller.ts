@@ -13,7 +13,7 @@ const setExpiryDate = (years: number): Date => {
 };
 
 export const purchasePolicy = async (req: Request, res: Response) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const { vehicleDetails, policyId, addons = [], basePremium, addonsPremium = 0 } = req.body;
 
   if (!vehicleDetails || !policyId || !basePremium) {
