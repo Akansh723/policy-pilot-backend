@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY yarn.lock ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile --network-timeout 200000
 
 COPY . .
 RUN yarn build
@@ -16,10 +16,12 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --production --frozen-lockfile --network-timeout 200000
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 8080
 
-CMD ["node", "dist/app.js"]
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
+CMD ["node", "dist/server.js"]
