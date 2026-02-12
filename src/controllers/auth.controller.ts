@@ -16,20 +16,24 @@ export const requestOTP = async (req: Request, res: Response) => {
     user = await User.create({ mobile });
   }
 
-  const otp = generateOTP();
+  const otp = env.useDummyOtp ? env.dummyOtp : generateOTP();
   const hashedOTP = await hashOTP(otp);
 
   user.otp = hashedOTP;
   user.otpExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
   await user.save();
 
-  try {
-    await sendOTPSMS(mobile, otp);
-  } catch (error) {
-    console.error("SMS sending failed:", error);
-    if (env.nodeEnv === "development") {
-      console.log("OTP (DEV ONLY):", otp);
+  if (!env.useDummyOtp) {
+    try {
+      await sendOTPSMS(mobile, otp);
+    } catch (error) {
+      console.error("SMS sending failed:", error);
+      if (env.nodeEnv === "development") {
+        console.log("OTP (DEV ONLY):", otp);
+      }
     }
+  } else {
+    console.log("Using dummy OTP:", otp);
   }
 
   return successResponse(res, 200, "OTP sent successfully");
