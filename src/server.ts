@@ -6,9 +6,9 @@ const startServer = async () => {
   await connectDB();
 
   const app = createApp();
-  app.listen(env.port, () => {
-    console.log(`🚀 Server running on port ${env.port}`);
-  });
+  app.listen(Number(env.port), "0.0.0.0", () => {
+  console.log(`Server running on port ${env.port}`);
+});
 };
 
 startServer();
