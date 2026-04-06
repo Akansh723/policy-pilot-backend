@@ -5,6 +5,7 @@ import { signToken } from "../utils/jwt";
 import { successResponse } from "../utils/response";
 import { sendOTPSMS } from "../utils/sms";
 import { env } from "../config/env";
+import { generateCsrfToken } from "../middlewares/csrf.middleware";
 
 const OTP_EXPIRY_MINUTES = 5;
 
@@ -70,10 +71,24 @@ export const verifyOTPAndLogin = async (req: Request, res: Response) => {
     name: user.name,
     createdAt: user.createdAt
   };
-  
+
+  const cookieOptions = {
+    secure: env.nodeEnv === "production",
+    sameSite: (env.nodeEnv === "production" ? "none" : "lax") as "none" | "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  };
+
+  res.cookie("token", token, { ...cookieOptions, httpOnly: true });
+  res.cookie("csrf-token", generateCsrfToken(), { ...cookieOptions, httpOnly: false });
+
   return successResponse(res, 200, "Login successful", {
-    token,
     user: userData,
     isNewUser: !user.name
   });
+};
+
+export const logout = (_req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.clearCookie("csrf-token");
+  return successResponse(res, 200, "Logged out successfully");
 };

@@ -1,7 +1,8 @@
 import { Router } from "express";
 import {
   requestOTP,
-  verifyOTPAndLogin
+  verifyOTPAndLogin,
+  logout
 } from "../controllers/auth.controller";
 import { validate } from "../middlewares/validate.middleware";
 import {
@@ -86,5 +87,7 @@ router.post("/request-otp", requestOTPValidator, validate, requestOTP);
  *         description: User not found
  */
 router.post("/verify-otp", verifyOTPValidator, validate, verifyOTPAndLogin);
+
+router.post("/logout", logout);
 
 export default router;
