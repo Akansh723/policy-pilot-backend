@@ -27,7 +27,8 @@ export const createApp = (): Application => {
     origin: env.corsOrigin.split(",").map(o => o.trim()),
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"]
+    allowedHeaders: ["Content-Type", "Authorization", "x-csrf-token"],
+    exposedHeaders: ["x-csrf-token"]
   }));
   app.use(helmet({
     contentSecurityPolicy: {

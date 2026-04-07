@@ -78,8 +78,11 @@ export const verifyOTPAndLogin = async (req: Request, res: Response) => {
     maxAge: 24 * 60 * 60 * 1000,
   };
 
+  const csrfToken = generateCsrfToken();
+
   res.cookie("token", token, { ...cookieOptions, httpOnly: true });
-  res.cookie("csrf-token", generateCsrfToken(), { ...cookieOptions, httpOnly: false });
+  res.cookie("csrf-token", csrfToken, { ...cookieOptions, httpOnly: true });
+  res.setHeader("x-csrf-token", csrfToken);
 
   return successResponse(res, 200, "Login successful", {
     user: userData,
