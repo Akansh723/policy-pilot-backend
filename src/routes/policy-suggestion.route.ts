@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { Vehicle } from "../models/vehicle.model";
 import { Policy } from "../models/policy.model";
 import { AddOn } from "../models/addon.model";
+import { cache } from "../middlewares/cache.middleware";
 
 const router = Router();
 
@@ -78,7 +79,11 @@ const calculateAddonPrice = (addon: any, premium: number) => {
     : Math.round((premium * addon.priceValue) / 100);
 };
 
-router.get("/suggest/:licencePlate", async (req: Request, res: Response) => {
+router.get("/suggest/:licencePlate", cache(600, (req) => {
+  const plate = req.params.licencePlate.toUpperCase();
+  const { fuelType, usageType, purchaseYear, insuranceClaimsCount } = req.query;
+  return `cache:suggest:${plate}:${fuelType || ""}:${usageType || ""}:${purchaseYear || ""}:${insuranceClaimsCount || ""}`;
+}), async (req: Request, res: Response) => {
   try {
     const licencePlate = req.params.licencePlate.toUpperCase();
     const { fuelType, usageType, purchaseYear, insuranceClaimsCount } = req.query;

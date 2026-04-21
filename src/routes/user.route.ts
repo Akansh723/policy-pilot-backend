@@ -1,8 +1,9 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { getProfile, updateProfile } from "../controllers/user.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { updateProfileValidator } from "../validators/user.validator";
+import { cache, invalidateCache } from "../middlewares/cache.middleware";
 
 const router = Router();
 
@@ -31,7 +32,7 @@ const router = Router();
  *       404:
  *         description: User not found
  */
-router.get("/profile", authenticate, getProfile);
+router.get("/profile", authenticate, cache(300, (req) => `cache:user:${req.user!.userId}`), getProfile);
 
 /**
  * @swagger
@@ -71,7 +72,10 @@ router.put(
   authenticate,
   updateProfileValidator,
   validate,
-  updateProfile
+  async (req: Request, res: Response) => {
+    await updateProfile(req, res);
+    invalidateCache(`cache:user:${req.user!.userId}`).catch(() => {});
+  }
 );
 
 export default router;
