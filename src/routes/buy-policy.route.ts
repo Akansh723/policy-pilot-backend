@@ -5,6 +5,7 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { purchasePolicy } from "../controllers/policy.controller";
 import { purchasePolicyValidator } from "../validators/policy.validator";
+import { cache, invalidateCache } from "../middlewares/cache.middleware";
 
 const router = Router();
 
@@ -20,7 +21,7 @@ const router = Router();
  *       200:
  *         description: List of all purchased policies
  */
-router.get("/all", authenticate, async (req: Request, res: Response) => {
+router.get("/all", authenticate, cache(300, () => "cache:policies:all"), async (req: Request, res: Response) => {
   const policies = await PolicyPurchase.find()
     .populate("userId", "mobile name")
     .populate("vehicleId")
@@ -102,6 +103,8 @@ router.post("/buy", authenticate,  async (req: Request, res: Response) => {
     totalPremium
   });
 
+  invalidateCache(`cache:policies:my:${userId}`, "cache:policies:all").catch(() => {});
+
   return successResponse(
     res,
     201,
@@ -123,7 +126,7 @@ router.post("/buy", authenticate,  async (req: Request, res: Response) => {
  *       200:
  *         description: List of user's purchased policies
  */
-router.get("/my", authenticate, async (req: Request, res: Response) => {
+router.get("/my", authenticate, cache(300, (req) => `cache:policies:my:${req.user!.userId}`), async (req: Request, res: Response) => {
   const userId = req.user!.userId;
   
   const policies = await PolicyPurchase.find({ userId })

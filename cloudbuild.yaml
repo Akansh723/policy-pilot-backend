@@ -1,9 +1,9 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/insurance-backend', '.']
+    args: ['build', '-t', '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/insurance-backend', '.']
   
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/insurance-backend']
+    args: ['push', '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/insurance-backend']
   
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
@@ -11,7 +11,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'insurance-backend'
-      - '--image=gcr.io/$PROJECT_ID/insurance-backend'
+      - '--image=$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/insurance-backend'
       - '--region=europe-west1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -21,9 +21,41 @@ steps:
       - '--min-instances=1'
       - '--cpu=2'
       - '--memory=2Gi'
-      - '--startup-cpu-boost'
+      - '--cpu-boost'
+      - '--update-env-vars=NODE_ENV=$_NODE_ENV'
+      - '--update-env-vars=API_URL=$_API_URL'
+      - '--update-env-vars=CORS_ORIGIN=$_CORS_ORIGIN'
+      - '--update-env-vars=USE_DUMMY_OTP=$_USE_DUMMY_OTP'
+      - '--update-env-vars=DUMMY_OTP=$_DUMMY_OTP'
+      - '--update-env-vars=MONGO_URI=$_MONGO_URI'
+      - '--update-env-vars=JWT_SECRET=$_JWT_SECRET'
+      - '--update-env-vars=JWT_EXPIRES_IN=$_JWT_EXPIRES_IN'
+      - '--update-env-vars=TWILIO_ACCOUNT_SID=$_TWILIO_ACCOUNT_SID'
+      - '--update-env-vars=TWILIO_AUTH_TOKEN=$_TWILIO_AUTH_TOKEN'
+      - '--update-env-vars=TWILIO_PHONE_NUMBER=$_TWILIO_PHONE_NUMBER'
+      - '--update-env-vars=UPSTASH_REDIS_REST_URL=$_UPSTASH_REDIS_REST_URL'
+      - '--update-env-vars=UPSTASH_REDIS_REST_TOKEN=$_UPSTASH_REDIS_REST_TOKEN'
 
 images:
-  - 'gcr.io/$PROJECT_ID/insurance-backend'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPOSITORY/insurance-backend'
+
+substitutions:
+  _NODE_ENV: production
+  _API_URL: https://policy-pilot-api-157386566439.europe-west1.run.app
+  _CORS_ORIGIN: https://policy-pilot-157386566439.europe-west1.run.app
+  _USE_DUMMY_OTP: 'false'
+  _DUMMY_OTP: '123456'
+  _MONGO_URI: <your-mongo-uri>
+  _JWT_SECRET: <your-jwt-secret>
+  _JWT_EXPIRES_IN: 1d
+  _AR_HOSTNAME: europe-west1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+  _TWILIO_ACCOUNT_SID: <your-twilio-account-sid>
+  _TWILIO_AUTH_TOKEN: <your-twilio-auth-token>
+  _TWILIO_PHONE_NUMBER: <your-twilio-phone-number>
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
 
 timeout: 1200s
