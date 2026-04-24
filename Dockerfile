@@ -19,6 +19,7 @@ COPY yarn.lock ./
 RUN yarn install --production --frozen-lockfile --network-timeout 200000
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/newrelic.js ./
 
 EXPOSE 8080
 
