@@ -18,6 +18,7 @@ build/
 *.js
 *.js.map
 !jest.config.js
+!newrelic.js
 
 # IDE
 .vscode/
