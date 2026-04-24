@@ -1,3 +1,4 @@
+import "newrelic";
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { connectDB } from "./config/db";
