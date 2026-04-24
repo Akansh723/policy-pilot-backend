@@ -1215,6 +1215,11 @@
   resolved "https://registry.yarnpkg.com/@types/ms/-/ms-2.1.0.tgz#052aa67a48eccc4309d7f0191b7e41434b90bb78"
   integrity sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==
 
+"@types/newrelic@^9.14.8":
+  version "9.14.8"
+  resolved "https://amcontroller-apac-prod-386077922041.d.codeartifact.ap-southeast-1.amazonaws.com/npm/amstack-nextgen/@types/newrelic/-/newrelic-9.14.8.tgz#68cb95f327dc212b8d0bebc083ff9e69dac864ee"
+  integrity sha512-rkOTEVR7Lui4TTEykDUxIxCbFkcI/yw3C8URLOWM84zjuHh9W35RAequHTEvGBbbrLCdn43FVTHMLji4uunDWQ==
+
 "@types/node@*":
   version "25.5.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-25.5.2.tgz#94861e32f9ffd8de10b52bbec403465c84fff762"
