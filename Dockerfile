@@ -24,5 +24,6 @@ COPY newrelic.js ./
 EXPOSE 8080
 
 ENV NODE_OPTIONS="--max-old-space-size=2048"
+ENV NEW_RELIC_HOME=/app
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "-r", "newrelic", "dist/server.js"]
