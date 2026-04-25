@@ -5,7 +5,7 @@ exports.config = {
   license_key: process.env.NEW_RELIC_LICENSE_KEY || "",
   distributed_tracing: { enabled: true },
   logging: {
-    level: "info",
+    level: "trace",
     filepath: "stdout",
   },
   allow_all_headers: true,

@@ -24,9 +24,19 @@ const router = Router();
  *                   format: date-time
  */
 router.get("/", (_req: Request, res: Response) => {
+  let nrStatus = "not loaded";
+  try {
+    const nr = require("newrelic");
+    const agent = nr.agent;
+    nrStatus = agent?._state || "unknown";
+  } catch {
+    nrStatus = "module not found";
+  }
+
   res.status(200).json({
     status: "OK",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    newrelic: nrStatus
   });
 });
 
