@@ -3,10 +3,12 @@ import redis from "../utils/redis";
 
 const DEFAULT_TTL = 300; // 5 minutes
 
-export const cache = (ttl: number = DEFAULT_TTL, keyFn?: (req: Request) => string) => {
+export const cache = (ttl: number = DEFAULT_TTL, keyFn?: (req: any) => string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const key = keyFn ? keyFn(req) : `cache:${req.originalUrl}`;
+      res.set("Cache-Control", "no-cache, no-store");
+      res.removeHeader("ETag");
       const cached = await redis.get(key);
 
       if (cached) {
@@ -16,7 +18,12 @@ export const cache = (ttl: number = DEFAULT_TTL, keyFn?: (req: Request) => strin
       const originalJson = res.json.bind(res);
       res.json = ((body: any) => {
         if (res.statusCode === 200 || res.statusCode === 201) {
-          redis.set(key, body, { ex: ttl }).catch(() => {});
+          try {
+            const plain = JSON.parse(JSON.stringify(body));
+            redis.set(key, plain, { ex: ttl }).catch(console.error);
+          } catch (e) {
+            console.error("[CACHE] Serialization error:", e);
+          }
         }
         return originalJson(body);
       }) as any;
