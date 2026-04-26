@@ -3,9 +3,9 @@ import { env } from "./config/env";
 import { connectDB } from "./config/db";
 
 const startServer = async () => {
-  console.log("NEW_RELIC_LICENSE_KEY set:", !!process.env.NEW_RELIC_LICENSE_KEY);
-  console.log("NEW_RELIC_APP_NAME:", process.env.NEW_RELIC_APP_NAME);
-  console.log("NEW_RELIC_HOME:", process.env.NEW_RELIC_HOME);
+  console.warn("NEW_RELIC_LICENSE_KEY set:", !!process.env.NEW_RELIC_LICENSE_KEY);
+  console.warn("NEW_RELIC_APP_NAME:", process.env.NEW_RELIC_APP_NAME);
+  console.warn("NEW_RELIC_HOME:", process.env.NEW_RELIC_HOME);
 
   await connectDB();
 
