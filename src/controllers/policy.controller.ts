@@ -3,6 +3,7 @@ import { Vehicle } from "../models/vehicle.model";
 import { PolicyPurchase } from "../models/policyPurchase.model";
 import { successResponse } from "../utils/response";
 import { generatePolicyNumber } from "../utils/policyNumber";
+import { razorpay } from "../utils/razorpay";
 
 const POLICY_DURATION_YEARS = 1;
 
@@ -34,6 +35,31 @@ export const purchasePolicy = async (req: Request, res: Response) => {
     vehicle = await Vehicle.create(vehicleDetails);
   }
 
+  const totalPremium = basePremium + addonsPremium;
+
+  const existing = await PolicyPurchase.findOne({
+    userId,
+    vehicleId: vehicle._id,
+    policyId,
+    status: "PENDING",
+  });
+
+  if (existing) {
+    return successResponse(res, 200, "Order already exists", {
+      purchaseId: existing._id,
+      orderId: existing.razorpayOrderId,
+      amount: Math.round(existing.totalPremium * 100),
+      currency: "INR",
+      keyId: process.env.RAZORPAY_KEY_ID,
+    });
+  }
+
+  const order = await razorpay.orders.create({
+    amount: Math.round(totalPremium * 100),
+    currency: "INR",
+    receipt: `policy_${Date.now()}`,
+  });
+
   const purchase = await PolicyPurchase.create({
     userId,
     vehicleId: vehicle._id,
@@ -42,17 +68,17 @@ export const purchasePolicy = async (req: Request, res: Response) => {
     policyNumber: generatePolicyNumber(),
     basePremium,
     addonsPremium,
-    totalPremium: basePremium + addonsPremium,
+    totalPremium,
     policyExpiryDate: setExpiryDate(POLICY_DURATION_YEARS),
-    status: "REVIEW"
+    status: "PENDING",
+    razorpayOrderId: order.id,
   });
 
-  return successResponse(res, 201, "Policy submitted for review", {
+  return successResponse(res, 201, "Order created", {
     purchaseId: purchase._id,
-    policyNumber: purchase.policyNumber,
-    vehicleId: vehicle._id,
-    policyExpiryDate: purchase.policyExpiryDate,
-    totalPremium: purchase.totalPremium,
-    status: purchase.status
+    orderId: order.id,
+    amount: order.amount,
+    currency: order.currency,
+    keyId: process.env.RAZORPAY_KEY_ID,
   });
 };
