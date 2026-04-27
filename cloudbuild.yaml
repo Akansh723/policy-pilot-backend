@@ -33,8 +33,6 @@ steps:
       - '--update-env-vars=TWILIO_ACCOUNT_SID=$_TWILIO_ACCOUNT_SID'
       - '--update-env-vars=TWILIO_AUTH_TOKEN=$_TWILIO_AUTH_TOKEN'
       - '--update-env-vars=TWILIO_PHONE_NUMBER=$_TWILIO_PHONE_NUMBER'
-      - '--update-env-vars=UPSTASH_REDIS_REST_URL=$_UPSTASH_REDIS_REST_URL'
-      - '--update-env-vars=UPSTASH_REDIS_REST_TOKEN=$_UPSTASH_REDIS_REST_TOKEN'
       - '--update-env-vars=NEW_RELIC_LICENSE_KEY=$_NEW_RELIC_LICENSE_KEY'
       - '--update-env-vars=NEW_RELIC_APP_NAME=$_NEW_RELIC_APP_NAME'
 

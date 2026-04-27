@@ -13,8 +13,12 @@ export interface IPolicyPurchase {
   addonsPremium: number;
   totalPremium: number;
 
-  status: "REVIEW" | "ACTIVE" | "CANCELLED" | "EXPIRED";
+  status: "PENDING" | "REVIEW" | "ACTIVE" | "CANCELLED" | "EXPIRED" | "PAYMENT_FAILED";
   policyExpiryDate: Date;
+
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
 
   adminRemarks?: string;
   approvedAt?: Date;
@@ -36,10 +40,14 @@ const policyPurchaseSchema = new Schema<IPolicyPurchase>(
 
     status: {
       type: String,
-      enum: ["REVIEW", "ACTIVE", "CANCELLED", "EXPIRED"],
-      default: "REVIEW"
+      enum: ["PENDING", "REVIEW", "ACTIVE", "CANCELLED", "EXPIRED", "PAYMENT_FAILED"],
+      default: "PENDING"
     },
     policyExpiryDate: { type: Date, required: true },
+
+    razorpayOrderId: { type: String, index: true },
+    razorpayPaymentId: String,
+    razorpaySignature: String,
 
     adminRemarks: String,
     approvedAt: Date

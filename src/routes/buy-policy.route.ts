@@ -6,6 +6,8 @@ import { validate } from "../middlewares/validate.middleware";
 import { purchasePolicy } from "../controllers/policy.controller";
 import { purchasePolicyValidator } from "../validators/policy.validator";
 import { cache, invalidateCache } from "../middlewares/cache.middleware";
+import { razorpay } from "../utils/razorpay";
+import crypto from "crypto";
 
 const router = Router();
 
@@ -77,40 +79,108 @@ router.post(
  *       400:
  *         description: Missing required fields
  */
-router.post("/buy", authenticate,  async (req: Request, res: Response) => {
-  const userId = req.user!.userId; 
-  const {
-    vehicleId,
-    policyId,
-    addons = [],
-    basePremium,
-    addonsPremium = 0
-  } = req.body;
+router.post("/buy", authenticate, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const {
+      vehicleId,
+      policyId,
+      addons = [],
+      basePremium,
+      addonsPremium = 0
+    } = req.body;
 
-  if (!vehicleId || !policyId || !basePremium) {
-    return res.status(400).json({ message: "Missing required fields" });
+    if (!vehicleId || !policyId || !basePremium) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const totalPremium = basePremium + addonsPremium;
+
+    const existing = await PolicyPurchase.findOne({
+      userId,
+      vehicleId,
+      policyId,
+      status: "PENDING",
+    });
+
+    if (existing) {
+      return successResponse(res, 200, "Order already exists", {
+        purchaseId: existing._id,
+        orderId: existing.razorpayOrderId,
+        amount: Math.round(existing.totalPremium * 100),
+        currency: "INR",
+        keyId: process.env.RAZORPAY_KEY_ID,
+      });
+    }
+
+    const order = await razorpay.orders.create({
+      amount: Math.round(totalPremium * 100),
+      currency: "INR",
+      receipt: `policy_${Date.now()}`,
+    });
+
+    const purchase = await PolicyPurchase.create({
+      userId,
+      vehicleId,
+      policyId,
+      addons,
+      basePremium,
+      addonsPremium,
+      totalPremium,
+      policyNumber: `POL-${Date.now()}`,
+      policyExpiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      status: "PENDING",
+      razorpayOrderId: order.id,
+    });
+
+    return successResponse(res, 201, "Order created", {
+      purchaseId: purchase._id,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
   }
+});
 
-  const totalPremium = basePremium + addonsPremium;
+router.post("/payment/verify", authenticate, async (req: Request, res: Response) => {
+  try {
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return res.status(400).json({ message: "Missing payment details" });
+    }
 
-  const purchase = await PolicyPurchase.create({
-    userId,
-    vehicleId,
-    policyId,
-    addons,
-    basePremium,
-    addonsPremium,
-    totalPremium
-  });
+    const purchase = await PolicyPurchase.findOne({ razorpayOrderId, userId: req.user!.userId });
+    if (!purchase) {
+      return res.status(404).json({ message: "Purchase not found" });
+    }
 
-  invalidateCache(`cache:policies:my:${userId}`, "cache:policies:all").catch(() => {});
+    const expected = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest("hex");
 
-  return successResponse(
-    res,
-    201,
-    "Policy submitted for review",
-    purchase
-  );
+    if (expected !== razorpaySignature) {
+      purchase.status = "PAYMENT_FAILED";
+      await purchase.save();
+      return res.status(400).json({ success: false, message: "Payment verification failed" });
+    }
+
+    purchase.razorpayPaymentId = razorpayPaymentId;
+    purchase.razorpaySignature = razorpaySignature;
+    if (purchase.status === "PENDING") {
+      purchase.status = "ACTIVE";
+    }
+    await purchase.save();
+
+    invalidateCache(`cache:policies:my:${req.user!.userId}`, "cache:policies:all").catch(() => {});
+
+    return successResponse(res, 200, "Payment verified", { purchaseId: purchase._id, status: purchase.status });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 });
 
 

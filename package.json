@@ -32,6 +32,7 @@
     "mongoose": "^8.1.1",
     "morgan": "^1.10.0",
     "newrelic": "^13.19.2",
+    "razorpay": "^2.9.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.11.2"
